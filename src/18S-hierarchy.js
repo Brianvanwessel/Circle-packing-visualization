@@ -1,0 +1,16 @@
+export const hierarchy18S = [
+  "domain",
+  "major_clade",
+  "major_clade",
+  "major_clade",
+  "superkingdom",
+  "kingdom",
+  "subingdom",
+  "phylum",
+  "subphylum",
+  "class",
+  "order",
+  "family",
+  "genus",
+  "species",
+];

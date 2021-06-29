@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Circle Packing</title>
+    <!-- <link rel="stylesheet" href="index.css" /> -->
+     <!-- svg-exportJS prerequisite: canvg -->
+     <script src="https://unpkg.com/canvg@3.0.1/lib/umd.js"></script>
+     <!-- svg-exportJS plugin -->
+     <script src="https://sharonchoong.github.io/svg-exportJS/svg-export.min.js"></script> 
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <script src = "https://unpkg.com/papaparse@5.2.0/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chroma-js/2.1.0/chroma.min.js" integrity="sha512-yocoLferfPbcwpCMr8v/B0AB4SWpJlouBwgE0D3ZHaiP1nuu5djZclFEIj9znuqghaZ3tdCMRrreLoM8km+jIQ==" crossorigin="anonymous"></script>
+  
+  </head>
+  <body>
+    <a href="#" id="download" class="test">Download</a>
+    <select id="layer-select"></select>
+    <select id="value-select"></select>
+    <select id="file-select"></select>
+    <div id = "parent">
+    <svg id="circle-packing"></svg>
+    <svg id ="circle-packing-legend"></svg>
+    </div>
+    <script src="./dist/bundle.js"></script>
+  </body>
+</html>
