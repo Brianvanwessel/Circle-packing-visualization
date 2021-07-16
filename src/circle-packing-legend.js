@@ -4,7 +4,7 @@
  * @param {*} data An Object containing the data of the selected circle in the visualization.
  * @returns legendData an Array containing the data that will be shown in the legend.
  */
-const createDataArray = (dataSet, data) => {
+const createDataArray = (dataSet, data, layer,lastLayer) => {
   const legendData = [];
   let header = [];
   dataSet.forEach((element, index) => {
@@ -12,13 +12,30 @@ const createDataArray = (dataSet, data) => {
       header = element;
       legendData.push(element.slice(1));
     } else {
-      if (element[0].includes(data.data.name)) {
-        let object = {};
-        header.forEach((e, index) => {
-          object[header[index]] = element[index];
-        });
-        legendData.push(object);
+      let taxonomy = "";
+      let splitPhylogeny = data.data.phylogeny.split(";");
+      splitPhylogeny.forEach((element, index) => {
+        if (index <= layer - 1) taxonomy = taxonomy + element + ";";
+      });
+      if(layer == lastLayer){
+        if (element[0] == taxonomy.slice(0, -1)) {
+          let object = {};
+          header.forEach((e, index) => {
+            object[header[index]] = element[index];
+          });
+          legendData.push(object);
+        }
+
+      } else{
+        if (element[0].includes(taxonomy.slice(0, -1))) {
+          let object = {};
+          header.forEach((e, index) => {
+            object[header[index]] = element[index];
+          });
+          legendData.push(object);
+        }
       }
+
     }
   });
   return legendData;
@@ -30,17 +47,17 @@ const createDataArray = (dataSet, data) => {
  * @param {*} dataSet An Array containing data used to create the visualization.
  * @returns legendData an Array containing the data that will be shown in the legend.
  */
-const generateLegendData = (data, dataSet) => {
+const generateLegendData = (data, dataSet, layer,lastLayer) => {
   // Generate data that will be shown in the legend
   let legendData;
   if (data.children == undefined) {
     if (data.length == 0) {
       legendData = [];
     } else {
-      legendData = createDataArray(dataSet, data);
+      legendData = createDataArray(dataSet, data, layer,lastLayer);
     }
   } else {
-    legendData = createDataArray(dataSet, data);
+    legendData = createDataArray(dataSet, data, layer,lastLayer);
   }
   return legendData;
 };
@@ -76,6 +93,7 @@ const generateTaxonomyData = (legendData, layer, data) => {
       });
     }
   }
+
   return taxonmyData;
 };
 
@@ -89,7 +107,7 @@ const compareValue = (value) => {
     if (a[value] < b[value]) {
       return 1;
     }
-    if (a.Depth > b.Depth) {
+    if (a.value> b.value) {
       return -1;
     }
     return 0;
@@ -102,8 +120,7 @@ const compareValue = (value) => {
  * @param {*} props an Object containing the data needed to generate the legend
  */
 export const circlePackingLegend = (legend_svg, props) => {
-  const { data, dataSet, layer, value } = props;
-
+  const { data, dataSet, layer, value, lastLayer } = props;
   // Width used for the legend
   const width = 400;
 
@@ -169,7 +186,6 @@ export const circlePackingLegend = (legend_svg, props) => {
     .merge(g.select("#firstHeader"))
     .attr("x", width / 4)
     .attr("y", 50)
-    .attr("dy", ".5 em")
     .attr("text-align", "left")
     .text((d) => {
       if (d.data != undefined) {
@@ -187,7 +203,6 @@ export const circlePackingLegend = (legend_svg, props) => {
     .merge(g.select("#secondHeader"))
     .attr("x", width + width / 2)
     .attr("y", 50)
-    .attr("dy", ".5 em")
     .attr("text-align", "left")
     .text((d) => {
       if (d.data != undefined) {
@@ -216,10 +231,18 @@ export const circlePackingLegend = (legend_svg, props) => {
   //Exit selection that removes old line elements.
   g.exit().selectAll("line").remove();
 
-  // Generate data needed for the legend and sort it based on the given value
-  const legendData = generateLegendData(data, dataSet).sort(
-    compareValue(value)
-  );
+  let legendData;
+  if (layer == null) {
+    // Generate data needed for the legend and sort it based on the given value
+    legendData = generateLegendData(data, dataSet, data.depth,lastLayer).sort(
+      compareValue(value)
+    );
+  } else {
+    // Generate data needed for the legend and sort it based on the given value
+    legendData = generateLegendData(data, dataSet, layer + 1,lastLayer).sort(
+      compareValue(value)
+    );
+  }
 
   // Generate taxonomy data needed for the legend
   const taxonomyData = generateTaxonomyData(legendData, layer, data);

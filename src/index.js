@@ -1,6 +1,6 @@
 import "../style.css";
 import { drawCirclePacking } from "/src/circle-packing.js";
-import loadedData from "../mixed-test.csv";
+import loadedData from "../RC-PCR-Samples.csv";
 
 /**
  * The function getURLParameter collects the parameters used in the URL.
@@ -111,7 +111,9 @@ const render = (
   checkbox,
   value,
   correctDataSet,
-  fileName
+  fileName,
+  method,
+
 ) => {
   let valueIndex;
   // Parse input data to correct format
@@ -140,6 +142,7 @@ const render = (
     value,
     dataSet,
     fileName,
+    method,
   });
 };
 
@@ -168,8 +171,8 @@ const generateVisualization = () => {
     setURLParameter("file", loadedData[0][0]);
   }
 
-  // Get the value for the file URL parameter
-  fileName = getURLParameter("file");
+  // // Get the value for the file URL parameter
+  // fileName = getURLParameter("file");
 
   const { correctDataSet, fileNames } = getCorrectDataset(loadedData, fileName);
   
@@ -177,7 +180,10 @@ const generateVisualization = () => {
   fillSelectionBox(correctDataSet[1].slice(1), value, "value-select");
 
   // Fill the file selection box
-  fillSelectionBox(fileNames, fileName, "file-select");
+  fillSelectionBox(fileNames.sort(), fileName, "file-select");
+
+  // Fill the method selection box
+  fillSelectionBox(["Sum","Max"], "Sum", "method-select");
 
   // Add event listener for the layer selection box
   document.getElementById("layer-select").onchange = (e) => {
@@ -190,7 +196,8 @@ const generateVisualization = () => {
         false,
         document.getElementById("value-select").value,
         correctDataSet,
-        fileName
+        fileName,
+        document.getElementById("method-select").value
       );
     } else {
       render(
@@ -201,7 +208,8 @@ const generateVisualization = () => {
         false,
         document.getElementById("value-select").value,
         correctDataSet,
-        fileName
+        fileName,
+        document.getElementById("method-select").value
       );
     }
   };
@@ -221,7 +229,37 @@ const generateVisualization = () => {
         false,
         document.getElementById("value-select").value,
         correctDataSet,
-        fileName
+        fileName,
+        document.getElementById("method-select").value
+      );
+    } else {
+      render(
+        Number(document.getElementById("layer-select").value) - 1,
+        svg,
+        legend_svg,
+        csvData,
+        false,
+        document.getElementById("value-select").value,
+        correctDataSet,
+        fileName,
+        document.getElementById("method-select").value
+      );
+    }
+  };
+
+  // Add event listener for the value selection box
+  document.getElementById("method-select").onchange = (e) => {
+    if (Number(document.getElementById("layer-select").value) == 0) {
+      render(
+        null,
+        svg,
+        legend_svg,
+        csvData,
+        false,
+        document.getElementById("value-select").value,
+        correctDataSet,
+        fileName,
+        document.getElementById("method-select").value
       );
     } else {
       render(
@@ -233,12 +271,13 @@ const generateVisualization = () => {
         document.getElementById("value-select").value,
         correctDataSet,
         fileName
+        ,document.getElementById("method-select").value
       );
     }
   };
 
   // Render the initial visualization
-  render(null, svg, legend_svg, csvData, true, value, correctDataSet, fileName);
+  render(null, svg, legend_svg, csvData, true, value, correctDataSet, fileName,document.getElementById("method-select").value);
 };
 
 // Initialize the visualiztion

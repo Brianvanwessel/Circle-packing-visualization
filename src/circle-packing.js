@@ -3,12 +3,15 @@ import { colors } from "/src/colors_array.js";
 import { hierarchy16S } from "/src/16S-hierarchy.js";
 import { hierarchy18S } from "/src/18S-hierarchy.js";
 
+
 /**
- * The function buildHierarchy is a function that transfroms a CSV file into hierarchical format.
- * @param {*} csv A String containing the CSV file
- * @returns An Object containing the hierarchical data.
+ * The function buildHierarchy is a function that transfroms filterd CSV file data into hierarchical format.
+ * @param {*} csv A String containing the filterd CSV file
+ * @param {*} layer A Integer containing the index of the last layer
+ * @param {*} method A String containing the method that will be used to calculate the values
+ * @returns 
  */
-const buildHierarchy = (csv) => {
+const filteredHierarchy = (csv, layer,method) => {
   // Helper function that transforms the given CSV into a hierarchical format.
   const root = { name: "root", children: [] };
   for (let i = 0; i < csv.length; i++) {
@@ -40,7 +43,11 @@ const buildHierarchy = (csv) => {
         }
         // If we don't already have a child node for this branch, create it.
         if (!foundChild) {
-          childNode = { name: nodeName, children: [] };
+          childNode = {
+            name: nodeName,
+            children: [],
+            previousLayer: csv[i][2],
+          };
           children.push(childNode);
         }
         currentNode = childNode;
@@ -51,9 +58,107 @@ const buildHierarchy = (csv) => {
             name: nodeName,
             value: size,
             previousLayer: previousLayer,
+            phylogeny: csv[i][3],
           };
         } else {
-          childNode = { name: nodeName, value: size };
+          childNode = {
+            name: nodeName,
+            value: size,
+            phylogeny: csv[i][3],
+            previousLayer: csv[i][2],
+          };
+        }
+
+        let exists = { status: false };
+
+        children.forEach((element, index) => {
+          let taxonomy = "";
+
+          let splitPhylogeny = childNode.phylogeny.split(";");
+          splitPhylogeny.forEach((element, index) => {
+            if (index <= layer) taxonomy = taxonomy + element + ";";
+          });
+          if (element.phylogeny.includes(taxonomy.slice(0, -1))) {
+            exists.status = true;
+            exists.value = element.value;
+            exists.index = index;
+          }
+        });
+
+        if (!exists.status) {
+          children.push(childNode);
+        } else {
+          if(method == "Sum"){
+            childNode.value = childNode.value + exists.value;
+          }
+          else if(method == "Max"){
+            if (exists.value > childNode.value){
+              childNode.value = exists.value
+            }
+          }
+          
+          children[exists.index] = childNode;
+        }
+      }
+    }
+  }
+
+  return root;
+};
+
+/**
+ * The function buildHierarchy is a function that transfroms a CSV file into hierarchical format.
+ * @param {*} csv A String containing the CSV file
+ * @param {*} method A String containing the method that will be used to calculate the values
+ * @returns An Object containing the hierarchical data.
+ */
+const buildHierarchy = (csv,method) => {
+  // Helper function that transforms the given CSV into a hierarchical format.
+  const root = { name: "root", children: [] };
+  for (let i = 0; i < csv.length; i++) {
+    const sequence = csv[i][0];
+    let size = +csv[i][1];
+    if (String(size)) {
+      size = size * 10000000000000000000000000000;
+    }
+    const previousLayer = csv[i][2];
+    if (isNaN(size)) {
+      // e.g. if this is a header row
+      continue;
+    }
+    const parts = sequence.split(";");
+    let currentNode = root;
+    for (let j = 0; j < parts.length; j++) {
+      const children = currentNode["children"];
+      const nodeName = parts[j];
+      let childNode = null;
+      if (j + 1 < parts.length) {
+        // Not yet at the end of the sequence; move down the tree.
+        let foundChild = false;
+        for (let k = 0; k < children.length; k++) {
+          if (children[k]["name"] == nodeName) {
+            childNode = children[k];
+            foundChild = true;
+            break;
+          }
+        }
+        // If we don't already have a child node for this branch, create it.
+        if (!foundChild) {
+          childNode = { name: nodeName, children: [], phylogeny: sequence };
+          children.push(childNode);
+        }
+        currentNode = childNode;
+      } else {
+        // Reached the end of the sequence; create a leaf node.
+        if (previousLayer != undefined) {
+          childNode = {
+            name: nodeName,
+            value: size,
+            previousLayer: previousLayer,
+            phylogeny: sequence,
+          };
+        } else {
+          childNode = { name: nodeName, value: size, phylogeny: sequence };
         }
 
         let exists = { status: false };
@@ -68,7 +173,14 @@ const buildHierarchy = (csv) => {
         if (!exists.status) {
           children.push(childNode);
         } else {
-          childNode.value = childNode.value + exists.value;
+          if(method == "Sum"){
+            childNode.value = childNode.value + exists.value;
+          }
+          else if(method == "Max"){
+            if (exists.value > childNode.value){
+              childNode.value = exists.value
+            }
+          }
           children[exists.index] = childNode;
         }
       }
@@ -86,7 +198,6 @@ const buildHierarchy = (csv) => {
 const filterData = (props) => {
   const { csv, layer } = props;
   const previousLayerObject = {};
-
   const layerData = csv
     .filter((element) => {
       const layers = element[0].split(";");
@@ -97,10 +208,11 @@ const filterData = (props) => {
         const layers = element[0].split(";");
         if (layers[layer - 1] != undefined) {
           if (previousLayerObject[layers[layer]] == undefined) {
-            previousLayerObject[layers[layer]] = layers[layer - 1];
+            previousLayerObject[element[0]] = layers[layer - 1];
           }
         }
-        return [layers[layer], element[1]];
+
+        return [layers[layer], element[1], element[0], element[0]];
       } else {
         return element;
       }
@@ -110,7 +222,7 @@ const filterData = (props) => {
   layerData.forEach((e) => {
     if (e[0] != "#Template") {
       const newValue = e;
-      newValue.push(previousLayerObject[e[0]]);
+      newValue[2] = previousLayerObject[e[2]];
       filterdData.push(newValue);
     } else {
       const newHeaders = e;
@@ -118,7 +230,7 @@ const filterData = (props) => {
       filterdData.push(newHeaders);
     }
   });
-  return { filterdData, previousLayerObject };
+  return { filterdData };
 };
 
 /**
@@ -166,7 +278,7 @@ const FillSelectionBox = (lastLayer, hierarchy) => {
  * @returns An Object containg the parsed data.
  */
 const parseCsvData = (props) => {
-  const { csvData, layer, checkbox, value, fileName } = props;
+  const { csvData, layer, checkbox, value, fileName,method } = props;
 
   let csv = d3.csvParseRows(csvData);
   let data;
@@ -182,12 +294,12 @@ const parseCsvData = (props) => {
     }
   }
   if (layer != null) {
-    const { filterdData, previousLayerObject } = filterData({ csv, layer });
-    data = buildHierarchy(filterdData, value);
-    return { data, previousLayerObject };
+    const { filterdData } = filterData({ csv, layer });
+    data = filteredHierarchy(filterdData, layer,method);
+    return { data ,lastLayer};
   } else {
-    data = buildHierarchy(csv, value);
-    return { data };
+    data = buildHierarchy(csv,method);
+    return { data,lastLayer };
   }
 };
 
@@ -231,25 +343,31 @@ export function drawCirclePacking(props) {
     value,
     dataSet,
     fileName,
+    method,
   } = props;
 
   // Parse the CSV data
-  const { data, previousLayerObject } = parseCsvData({
+  const { data,lastLayer } = parseCsvData({
     csvData,
     layer,
     checkbox,
     value,
     fileName,
+    method,
   });
 
   // If needed create a color scale for the previous layer
   let previousLayerColor;
-  if (previousLayerObject != undefined) {
+  if (layer != null) {
+    const allLayers = [];
+    data.children.forEach((element, index) => {
+      allLayers.push(element.previousLayer);
+    });
+    const uniqueElements = [...new Set(allLayers)];
     const color_scale = chroma.scale(colors);
-    const uniqueElements = Object.values(previousLayerObject);
     previousLayerColor = createSortedColorScale(
       uniqueElements,
-      color_scale.colors(Object.values(previousLayerObject).length)
+      color_scale.colors(uniqueElements.length)
     );
   }
   // Define constants
@@ -258,7 +376,6 @@ export function drawCirclePacking(props) {
 
   // Calculate packing data
   const root = pack(data, width, height);
-
   let focus = root;
   let view;
 
@@ -277,7 +394,9 @@ export function drawCirclePacking(props) {
     .style("margin", "0 -14px")
     .style("background", color(0))
     .style("cursor", "pointer")
-    .on("click", (event) => zoom(event, root));
+    .on("click", (event) => {
+      zoom(event, root)
+    });
 
   // Create a data binding that adds a single element.
   const circlePackingg = svg.selectAll("#container").data([null]);
@@ -314,15 +433,17 @@ export function drawCirclePacking(props) {
     })
     .on("mouseover", function (event, d) {
       const data = d;
-      circlePackingLegend(legend_svg, { data, dataSet, layer, value });
+      circlePackingLegend(legend_svg, { data, dataSet, layer, value,lastLayer });
       d3.select(this).attr("stroke", "#000");
     })
     .on("mouseout", function () {
       const data = [];
       d3.select(this).attr("stroke", null);
-      circlePackingLegend(legend_svg, { data, layer, value });
+      circlePackingLegend(legend_svg, { data, layer, value,lastLayer });
     })
     .on("click", (event, d) => {
+
+      console.log('in')
       !d.children
         ? "none"
         : focus !== d && (zoom(event, d), event.stopPropagation());
