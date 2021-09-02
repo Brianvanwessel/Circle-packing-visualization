@@ -1,6 +1,6 @@
 import "../style.css";
 import { drawCirclePacking } from "/src/circle-packing.js";
-import loadedData from "../RC-PCR-Samples.csv";
+import loadedData from "../Data.csv";
 
 /**
  * The function getURLParameter collects the parameters used in the URL.
