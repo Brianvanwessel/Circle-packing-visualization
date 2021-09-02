@@ -1,3 +1,0 @@
-18S-03.res
-#Template,Score,Expected,Template_length,Template_Identity,Template_Coverage,Query_Identity,Query_Coverage,Depth,q_value,p_value
-Eukaryota;Amorphea;Obazoa;Opisthokonta;Nucletmycea;Fungi;Dikarya;Ascomycota;Pezizomycotina;Eurotiomycetes;Eurotiales;Aspergillaceae;Aspergillus;Aspergillus_sp.,25000,0,1214,20.59,100.00,20.59,100.00,20.59,25000.00,1.0e-26
