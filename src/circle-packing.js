@@ -442,8 +442,6 @@ export function drawCirclePacking(props) {
       circlePackingLegend(legend_svg, { data, layer, value,lastLayer });
     })
     .on("click", (event, d) => {
-
-      console.log('in')
       !d.children
         ? "none"
         : focus !== d && (zoom(event, d), event.stopPropagation());
