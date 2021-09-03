@@ -285,9 +285,9 @@ const parseCsvData = (props) => {
   const lastLayer = getLastLayer({ csv });
 
   if (checkbox) {
-    if (fileName.includes("18S")) {
+    if (fileName.toUpperCase().includes("18S")) {
       FillSelectionBox(lastLayer, hierarchy18S);
-    } else if (fileName.includes("16S")) {
+    } else if (fileName.toUpperCase().includes("16S")) {
       FillSelectionBox(lastLayer, hierarchy16S);
     } else {
       FillSelectionBox(lastLayer);
