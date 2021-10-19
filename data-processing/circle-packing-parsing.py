@@ -5,17 +5,17 @@ import argparse
 
 def main():
     args = parse_args()
-    parsedFiles = parseBatchFiles(args.input)
-    exportBatchFiles(parsedFiles,args.output)
+    parsedFiles = parseBatchFiles(args.inputDir)
+    exportBatchFiles(parsedFiles,args.outputFile)
 
 def parse_args():
     """
         Argument parser
     """
     parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("-i", "--input", type=str, required=True,
+    parser.add_argument("-i", "--inputDir", type=str, required=True,
                         help="input folder-name")
-    parser.add_argument("-o", "--output", type=str, required=True,
+    parser.add_argument("-o", "--outputFile", type=str, required=True,
                         help="input file-name")
 
     # parse all arguments
