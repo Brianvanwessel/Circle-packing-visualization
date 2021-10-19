@@ -1,13 +1,35 @@
 ## Circle-packing graph that visualizes 16s/18s rRNA taxonomic data
 
 # How to create the visualization
+#### if needed add sudo
     - Pull the main branch from Github
+    
+   ```bash
+   git clone https://github.com/Brianvanwessel/Circle-packing-visulaization.git
+   ```
+    
     - Make sure node and npm are installed
+    
+   ```bash
+   curl -sL https://deb.nodesource.com/setup_14.x - o nodesource_setup.sh
+   bash nodesource_setup.sh
+   apt-get install -y nodejs
+   ```
+    
     - Run "npm install" to install needed packages
-    - Add the CSV file you want to use for the visualization in the main directory and call it Data.csv
+   ```bash
+   cd Circle-packing-visualization
+   npm install
+   ```
+    
+    - Add the CSV file (Data.csv) you want to visualize in the main directory (Circle-packing-visualization)
         - Change the filename of 'loadedData' variable in de src/index.js if you want your data file to have a different name
     - run npm run build in the main directory
-    - Open the index.html file and use the visualization
+   ```bash
+   npm run build
+   ```
+    
+    - Open the index.html file in a browser to see the visualization
 
 # How to distribute the visualization(the files that are needed to keep the visualization work)
     - The dist folder, this folder should include the bundle.js file
