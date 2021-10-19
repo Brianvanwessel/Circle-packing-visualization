@@ -3,7 +3,7 @@
 # How to create the visualization
 #### if needed add sudo
     - Pull the main branch from Github
-        git clone https://github.com/Brianvanwessel/Circle-packing-visulaization.git
+        git clone https://github.com/Brianvanwessel/Circle-packing-visualization.git
     
     - Make sure node and npm are installed
         curl -sL https://deb.nodesource.com/setup_14.x - o nodesource_setup.sh
