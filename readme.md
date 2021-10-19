@@ -3,31 +3,21 @@
 # How to create the visualization
 #### if needed add sudo
     - Pull the main branch from Github
-    
-   ```bash
-   git clone https://github.com/Brianvanwessel/Circle-packing-visulaization.git
-   ```
+        git clone https://github.com/Brianvanwessel/Circle-packing-visulaization.git
     
     - Make sure node and npm are installed
-    
-   ```bash
-   curl -sL https://deb.nodesource.com/setup_14.x - o nodesource_setup.sh
-   bash nodesource_setup.sh
-   apt-get install -y nodejs
-   ```
+        curl -sL https://deb.nodesource.com/setup_14.x - o nodesource_setup.sh
+        bash nodesource_setup.sh
+        apt-get install -y nodejs
     
     - Run "npm install" to install needed packages
-   ```bash
-   cd Circle-packing-visualization
-   npm install
-   ```
+        cd Circle-packing-visualization
+        npm install
     
     - Add the CSV file (Data.csv) you want to visualize in the main directory (Circle-packing-visualization)
         - Change the filename of 'loadedData' variable in de src/index.js if you want your data file to have a different name
     - run npm run build in the main directory
-   ```bash
-   npm run build
-   ```
+        npm run build
     
     - Open the index.html file in a browser to see the visualization
 
