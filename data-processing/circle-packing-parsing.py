@@ -14,9 +14,9 @@ def parse_args():
     """
     parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("-i", "--inputDir", type=str, required=True,
-                        help="input folder-name")
+                        help="full path name to folder")
     parser.add_argument("-o", "--outputFile", type=str, required=True,
-                        help="input file-name")
+                        help="full path to output filename")
 
     # parse all arguments
     args = parser.parse_args()
